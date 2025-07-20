@@ -4,3 +4,4 @@ openpyxl
 requests
 cryptography
 pytz
+plotly
