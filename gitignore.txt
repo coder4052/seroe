@@ -1,8 +1,0 @@
-__pycache__/
-*.py[cod]
-*$py.class
-.env
-.streamlit/secrets.toml
-*.log
-.DS_Store
-Thumbs.db
