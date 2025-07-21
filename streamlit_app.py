@@ -1615,29 +1615,18 @@ if is_admin:
 st.markdown("---")
 st.markdown(
     """
-    <div style="
+    <h2 style="
         text-align: center;
-        padding: 25px 0;
-        border-top: 3px solid #1f77b4;
-        border-bottom: 3px solid #1f77b4;
-        margin: 20px 0;
-        background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%);
-    ">
-        <h2 style="
-            color: #2c3e50;
-            font-size: 30px;
-            font-weight: 600;
-            margin: 0;
-            letter-spacing: 2px;
-        ">믿음에 가치를 더하다</h2>
-        <div style="
-            width: 100px;
-            height: 3px;
-            background: linear-gradient(45deg, #1f77b4, #ff7f0e);
-            margin: 10px auto 0;
-            border-radius: 2px;
-        "></div>
-    </div>
+        color: #2E86AB;
+        font-size: 36px;
+        font-weight: bold;
+        margin: 30px 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+        background: rgba(46, 134, 171, 0.05);
+        border-radius: 10px;
+        border-left: 5px solid #2E86AB;
+    ">🌟 믿음에 가치를 더하다 🌟</h2>
     """, 
     unsafe_allow_html=True
 )
