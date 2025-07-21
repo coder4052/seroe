@@ -12,6 +12,9 @@ import requests
 from cryptography.fernet import Fernet
 import gc
 import time
+import random
+from datetime import datetime
+
 
 
 # 한국 시간대 설정
@@ -1613,6 +1616,27 @@ if is_admin:
 
 # 버전 정보
 st.markdown("---")
+
+st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%); 
+                color: white; padding: 20px; border-radius: 15px; 
+                margin: 15px 0; text-align: center;">
+        <h3>🔮 {"오늘의 운세"}</h3>
+    </div>
+""", unsafe_allow_html=True)
+
+fortune_options = [
+    "💰 재물운: 오늘은 예상치 못한 수익이 있을 수 있어요",
+    "💕 연애운: 새로운 만남이나 관계 발전의 기회가 있어요", 
+    "💼 직장운: 업무에서 좋은 성과를 거둘 수 있는 날이에요",
+    "🏥 건강운: 몸과 마음의 컨디션이 좋은 하루가 될 거예요",
+    "🎯 행운: 모든 일이 순조롭게 풀리는 럭키데이!"
+]
+
+if st.button("🎲 오늘의 운세 확인하기", key="fortune"):
+    today_fortune = random.choice(fortune_options)
+    st.success(today_fortune)
+
 st.markdown(
     """
     <h2 style="
