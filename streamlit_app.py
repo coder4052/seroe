@@ -1613,4 +1613,7 @@ if is_admin:
 
 # 버전 정보
 st.markdown("---")
-st.markdown("**믿음에 가치를 더하다** | ")
+st.markdown(
+    '<h3 style="font-size: 24px; margin-bottom: 0px;">믿음에 가치를 더하다</h3>', 
+    unsafe_allow_html=True
+)
