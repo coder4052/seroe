@@ -620,9 +620,9 @@ def group_orders_by_recipient(df):
 
         # 고유 식별자 생성
         if orderer_name and orderer_name != recipient_name:
-            recipient_key = f"{recipient_name}#{orderer_name}"
+            recipient_key = f"{recipient_name} - 주문자: {orderer_name}"
         else:
-            recipient_key = f"{recipient_name}#직접주문"
+            recipient_key = f"{recipient_name} - 직접주문"
         
         # 상품 정보 추출
         option_product = extract_product_from_option(row.get('옵션이름', ''))
