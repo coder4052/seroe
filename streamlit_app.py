@@ -1042,8 +1042,8 @@ with tab2:
             if box_name != '박스 E':
                 description = BOX_DESCRIPTIONS.get(box_name, "")
                 
-                # 박스 B의 경우 용량 글자 크기를 조금 줄임
-                description_font_size = "14px" if box_name == "박스 B" else "16px"
+                # 박스 A, B의 경우 용량 글자 크기를 조금 줄임
+                description_font_size = "14px" if box_name in ["박스 A", "박스 B"] else "16px"
                 
                 st.markdown(f"""
                     <div style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); 
