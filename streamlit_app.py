@@ -1629,21 +1629,3 @@ fortune_messages = [
 if st.button("🎲 오늘의 운세 확인하기", key="fortune"):
     today_fortune = random.choice(fortune_options)
     st.success(today_fortune)
-
-st.markdown(
-    """
-    <h2 style="
-        text-align: center;
-        color: #2E86AB;
-        font-size: 36px;
-        font-weight: bold;
-        margin: 30px 0;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        padding: 20px;
-        background: rgba(46, 134, 171, 0.05);
-        border-radius: 10px;
-        border-left: 5px solid #2E86AB;
-    ">믿음에 가치를 더하다</h2>
-    """, 
-    unsafe_allow_html=True
-)
