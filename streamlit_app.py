@@ -1614,6 +1614,7 @@ if is_admin:
             st.error("❌ 데이터 저장 중 오류가 발생했습니다.")
 
 
+
 # 버전 정보
 st.markdown("---")
 st.markdown("### 🔮 오늘의 운세")
@@ -1695,7 +1696,7 @@ fortune_options = [
 기분이 좋지 않다면 억지로 참지 말고 적절한 방법으로 표현해보세요. 깊게 호흡하거나 잠깐 산책하는 것만으로도 마음이 진정될 수 있어요. 부정적인 감정도 자연스러운 것이니 자책하지 말고, 곧 지나갈 것이라고 생각하세요."""
 ]
 
-# 운세 버튼 및 표시 로직
+# 운세 버튼 및 표시 로직 - Streamlit 기본 컴포넌트 사용
 if st.button("🎲 오늘의 운세 확인하기", key="fortune"):
     today_fortune = random.choice(fortune_options)
     
@@ -1704,27 +1705,10 @@ if st.button("🎲 오늘의 운세 확인하기", key="fortune"):
     summary = lines[0]  # 한줄평
     details = '\n'.join(lines[1:]).strip()  # 세부사항
     
-    # 개선된 UI로 표시
-    st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%); 
-                color: white; padding: 25px; border-radius: 15px; 
-                margin: 15px 0; box-shadow: 0 6px 12px rgba(0,0,0,0.15);">
+    # Streamlit 기본 컴포넌트 사용 - 안정적이고 확실한 표시
+    with st.container():
+        st.markdown("#### 🔮 오늘의 한줄평")
+        st.info(summary)
         
-        <!-- 한줄평 섹션 -->
-        <div style="margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px;">
-            <h4 style="margin: 0; color: #e8d5ff; font-size: 16px; font-weight: normal;">🔮 오늘의 한줄평</h4>
-            <h3 style="margin: 10px 0 0 0; font-size: 20px; font-weight: bold; line-height: 1.4;">
-                {summary}
-            </h3>
-        </div>
-        
-        <!-- 세부사항 섹션 -->
-        <div>
-            <h4 style="margin: 0 0 10px 0; color: #e8d5ff; font-size: 16px; font-weight: normal;">📝 세부사항</h4>
-            <p style="margin: 0; font-size: 16px; line-height: 1.6; opacity: 0.95;">
-                {details}
-            </p>
-        </div>
-        
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown("#### 📝 세부사항")
+        st.success(details)
