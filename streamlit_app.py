@@ -14,7 +14,7 @@ import gc
 import time
 import random
 from datetime import datetime
-
+import time
 
 
 # 한국 시간대 설정
@@ -1727,19 +1727,58 @@ fortune_options = [
 기분이 좋지 않다면 억지로 참지 말고 적절한 방법으로 표현해보세요. 깊게 호흡하거나 잠깐 산책하는 것만으로도 마음이 진정될 수 있어요. 부정적인 감정도 자연스러운 것이니 자책하지 말고, 곧 지나갈 것이라고 생각하세요."""
 ]
 
-# 운세 버튼 및 표시 로직 - Streamlit 기본 컴포넌트 사용
+# 운세 버튼 및 애니메이션 효과
 if st.button("🎲 오늘의 운세 확인하기", key="fortune"):
-    today_fortune = random.choice(fortune_options)
     
-    # 첫 줄과 세부사항 분리
+    # 1단계: 주사위 애니메이션 (스피너 사용)
+    with st.spinner("🎲 운명의 주사위가 굴러가는 중..."):
+        time.sleep(1.5)  # 1.5초 대기로 긴장감 조성
+    
+    # 2단계: 결과 알림
+    st.success("🎯 당신의 운세가 결정되었습니다!")
+    
+    # 3단계: 운세 선택 및 분석
+    today_fortune = random.choice(fortune_options)
     lines = today_fortune.strip().split('\n')
     summary = lines[0]  # 한줄평
     details = '\n'.join(lines[1:]).strip()  # 세부사항
     
-    # Streamlit 기본 컴포넌트 사용 - 안정적이고 확실한 표시
+    # 4단계: 운세 내용에 따른 맞춤형 축하 효과
+    positive_keywords = [
+        "성공", "좋은", "기쁨", "행복", "성취", "발전", "기회", "성장", "열정", "용기", "희망", "긍정",
+        "도전", "가능성", "자신감", "보람", "기적", "승리", "사랑", "즐거움", "만족", "감사", 
+        "의미", "훌륭한", "진정한", "소중한", "빛", "에너지", "힘", "도움", "안심", "평화"
+    ]
+    
+    cautious_keywords = [
+        "신중", "주의", "세심", "조심", "검토", "계획", "차분", "침착", "균형", "관리",
+        "오해", "실수", "여유", "신중히", "점검", "우선순위", "집중", "정리", "현명한"
+    ]
+    
+    reflective_keywords = [
+        "귀 기울", "생각", "인정", "표현", "과정", "여행", "시간", "공간", "감정", "마음",
+        "휴식", "힐링", "성찰", "격려", "친절", "너그럽게", "소홀히", "일관성"
+    ]
+    
+    # 키워드 매칭 및 효과 결정
+    full_text = summary + " " + details  # 전체 텍스트에서 키워드 검색
+    
+    if any(keyword in full_text for keyword in positive_keywords):
+        st.balloons()  # 긍정적인 운세일 때 축하 풍선
+        st.success("🎉 오늘은 좋은 에너지가 가득한 날이에요!")
+    elif any(keyword in full_text for keyword in cautious_keywords):
+        st.info("🧘‍♀️ 신중하고 차분한 마음으로 하루를 보내세요")
+    elif any(keyword in full_text for keyword in reflective_keywords):
+        st.info("🌙 자신을 돌아보고 성찰하는 의미 있는 하루가 되세요")
+    else:
+        st.snow()  # 기타 운세일 때 눈꽃 효과
+        st.info("❄️ 차분하고 평온한 하루를 보내세요")
+
+    
+    # 5단계: 운세 내용 표시
     with st.container():
-        st.markdown("####   오늘의 한줄평")
+        st.markdown("#### 🔮 오늘의 한줄평")
         st.info(summary)
         
-        st.markdown("####   세부사항")
+        st.markdown("#### 📝 세부사항")
         st.success(details)
