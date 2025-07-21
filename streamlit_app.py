@@ -1707,8 +1707,8 @@ if st.button("🎲 오늘의 운세 확인하기", key="fortune"):
     
     # Streamlit 기본 컴포넌트 사용 - 안정적이고 확실한 표시
     with st.container():
-        st.markdown("#### 오늘의 한줄평")
+        st.markdown("####   오늘의 한줄평")
         st.info(summary)
         
-        st.markdown("#### 세부사항")
+        st.markdown("####   세부사항")
         st.success(details)
