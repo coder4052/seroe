@@ -1626,7 +1626,7 @@ st.markdown(
         background: rgba(46, 134, 171, 0.05);
         border-radius: 10px;
         border-left: 5px solid #2E86AB;
-    ">🌟 믿음에 가치를 더하다 🌟</h2>
+    ">믿음에 가치를 더하다</h2>
     """, 
     unsafe_allow_html=True
 )
