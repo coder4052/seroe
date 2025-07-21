@@ -610,11 +610,19 @@ def standardize_capacity_for_box(capacity):
 
 # 📦 박스 계산 함수들
 def group_orders_by_recipient(df):
-    """수취인별로 주문을 그룹화하여 박스 계산"""
+    """수취인별로 주문을 그룹화하여 박스 계산 - 동명이인 구분 개"""
     orders = defaultdict(dict)
     
     for _, row in df.iterrows():
+        # 복합 키 생성: 수취인이름 + 주문자이름으로 동명이인 구
         recipient = row.get('수취인이름', '알 수 없음')
+        orderer_name = row.get('주문자이름', '알 수 없음').strip()
+
+        # 고유 식별자 생성
+        if orderer_name and orderer_name != recipient_name:
+            recipient_key = f"{recipient_name}#{orderer_name}"
+        else:
+            recipient_key = f"{recipient_name}#직접주문"
         
         # 상품 정보 추출
         option_product = extract_product_from_option(row.get('옵션이름', ''))
@@ -637,7 +645,7 @@ def group_orders_by_recipient(df):
         else:
             key = final_product
         
-        orders[recipient][key] = orders[recipient].get(key, 0) + total_quantity
+        orders[recipient_key][key] = orders[recipient_key].get(key, 0) + total_quantity
     
     return orders
 
