@@ -615,8 +615,8 @@ def group_orders_by_recipient(df):
     
     for _, row in df.iterrows():
         # 복합 키 생성: 수취인이름 + 주문자이름으로 동명이인 구
-        recipient = row.get('수취인이름', '알 수 없음')
-        orderer_name = row.get('주문자이름', '알 수 없음').strip()
+        recipient_name = row.get('수취인이름', '알 수 없음')
+        orderer_name = row.get('주문자이름', '').strip()
 
         # 고유 식별자 생성
         if orderer_name and orderer_name != recipient_name:
