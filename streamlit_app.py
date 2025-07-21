@@ -1614,6 +1614,30 @@ if is_admin:
 # 버전 정보
 st.markdown("---")
 st.markdown(
-    '<h3 style="font-size: 24px; margin-bottom: 0px;">믿음에 가치를 더하다</h3>', 
+    """
+    <div style="
+        text-align: center;
+        padding: 25px 0;
+        border-top: 3px solid #1f77b4;
+        border-bottom: 3px solid #1f77b4;
+        margin: 20px 0;
+        background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%);
+    ">
+        <h2 style="
+            color: #2c3e50;
+            font-size: 30px;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 2px;
+        ">믿음에 가치를 더하다</h2>
+        <div style="
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(45deg, #1f77b4, #ff7f0e);
+            margin: 10px auto 0;
+            border-radius: 2px;
+        "></div>
+    </div>
+    """, 
     unsafe_allow_html=True
 )
