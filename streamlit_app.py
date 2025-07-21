@@ -1614,6 +1614,6 @@ if is_admin:
 # 버전 정보
 st.markdown("---")
 st.markdown(
-    '<h3 style="font-size: 24px; margin-bottom: 0px;">출고 및 재고관리 verson - 동명이인 구분</h3>', 
+    '<h3 style="font-size: 24px; margin-bottom: 0px;">믿음에 가치를 더하다</h3>', 
     unsafe_allow_html=True
 )
