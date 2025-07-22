@@ -174,33 +174,41 @@ h3 {
     padding: 2rem;
 }
 
-/* 탭 버튼 크기 확대 */
+/* 탭 버튼 크기 및 스타일 개선 */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 15px !important;
+    margin-bottom: 25px !important;
+    padding: 10px 0 !important;
+}
+
 .stTabs [data-baseweb="tab-list"] button {
-    font-size: 30px !important;
-    font-weight: 600 !important;
-    padding: 15px 25px !important;
-    min-height: 50px !important;
-    border-radius: 8px !important;
-    margin-right: 5px !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    padding: 18px 30px !important;
+    min-height: 60px !important;
+    min-width: 150px !important;
+    border-radius: 10px !important;
+    margin-right: 0 !important;
+    border: 2px solid #e0e0e0 !important;
+    transition: all 0.2s ease !important;
+    background-color: #ffffff !important;
+    color: #666666 !important;
 }
 
 /* 탭 버튼 hover 효과 */
 .stTabs [data-baseweb="tab-list"] button:hover {
-    background-color: #f0f2f6 !important;
+    background-color: #f5f5f5 !important;
     color: #1f77b4 !important;
+    border-color: #1f77b4 !important;
+    transform: translateY(-1px) !important;
 }
 
 /* 활성 탭 스타일 */
 .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
     background-color: #1f77b4 !important;
     color: white !important;
-    font-weight: bold !important;
-}
-
-/* 탭 컨테이너 여백 */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 8px !important;
-    margin-bottom: 20px !important;
+    font-weight: 800 !important;
+    border-color: #1f77b4 !important;
 }
 </style>
 """, unsafe_allow_html=True)
