@@ -176,7 +176,7 @@ h3 {
 
 /* 탭 버튼 크기 확대 */
 .stTabs [data-baseweb="tab-list"] button {
-    font-size: 18px !important;
+    font-size: 30px !important;
     font-weight: 600 !important;
     padding: 15px 25px !important;
     min-height: 50px !important;
