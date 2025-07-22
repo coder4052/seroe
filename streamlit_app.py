@@ -173,6 +173,35 @@ h3 {
     align-items: center;
     padding: 2rem;
 }
+
+/* 탭 버튼 크기 확대 */
+.stTabs [data-baseweb="tab-list"] button {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    padding: 15px 25px !important;
+    min-height: 50px !important;
+    border-radius: 8px !important;
+    margin-right: 5px !important;
+}
+
+/* 탭 버튼 hover 효과 */
+.stTabs [data-baseweb="tab-list"] button:hover {
+    background-color: #f0f2f6 !important;
+    color: #1f77b4 !important;
+}
+
+/* 활성 탭 스타일 */
+.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+    background-color: #1f77b4 !important;
+    color: white !important;
+    font-weight: bold !important;
+}
+
+/* 탭 컨테이너 여백 */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px !important;
+    margin-bottom: 20px !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
