@@ -182,7 +182,7 @@ h3 {
 }
 
 .stTabs [data-baseweb="tab-list"] button {
-    font-size: 20px !important;
+    font-size: 26px !important;
     font-weight: 700 !important;
     padding: 18px 30px !important;
     min-height: 60px !important;
