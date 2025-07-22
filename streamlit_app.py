@@ -1111,8 +1111,7 @@ with tab2:
                         order_details.append(f"{capacity} {qty}개")
                 
                 summary_data.append({
-                    "주문 번호": f"주문 {i}",
-                    "수취인": order.get('recipient', '알 수 없음'),
+                    "검토 대상": f"#{i}",
                     "주문 내역": ", ".join(order_details) if order_details else "확인 필요"
                 })
             
