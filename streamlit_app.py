@@ -1140,23 +1140,15 @@ with tab3:
     weekday = weekdays[today.weekday()]
     today_date_label = today.strftime(f"%m월 %d일 ({weekday})")
     
-    # 출고 현황과 동기화된 상품 키 가져오기 + 추가 필수 상품
-    shipment_results, _ = load_shipment_data()
-    
-    # 기본 상품 키 목록 (출고 현황 기반)
-    product_keys = set()
-    if shipment_results:
-        product_keys.update(shipment_results.keys())
-    
-    # 추가 필수 상품 목록 (수동 추가 - 밥알없는 제품 포함)
-    additional_products = [
-        "단호박식혜 1.5ㅣ",
+    # 전체 상품 목록 (항상 표시될 모든 제품) - 출고 현황과 관계없이
+    ALL_PRODUCTS = [
+        "단호박식혜 1.5L",
         "단호박식혜 1L",
         "단호박식혜 240ml",
         "식혜 1.5L",
         "식혜 1L",
         "식혜 240ml",
-        "수정과 500ml"
+        "수정과 500ml",
         "밥알없는 단호박식혜 1.5L",
         "밥알없는 단호박식혜 1L",
         "밥알없는 단호박식혜 240ml",
@@ -1167,7 +1159,14 @@ with tab3:
         "플레인 쌀요거트 200ml"
     ]
     
-    product_keys.update(additional_products)
+    # 모든 상품을 기본으로 설정
+    product_keys = set(ALL_PRODUCTS)
+    
+    # 출고 현황에 있는 추가 상품들도 포함 (혹시 누락된 것들을 위해)
+    shipment_results, _ = load_shipment_data()
+    if shipment_results:
+        product_keys.update(shipment_results.keys())
+    
     product_keys = sorted(list(product_keys))
     
     if product_keys:
