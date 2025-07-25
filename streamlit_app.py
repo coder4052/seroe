@@ -16,6 +16,8 @@ import random
 from datetime import datetime
 import time
 
+# ✅ product_mapping 모듈 import 추가
+from product_mapping import get_product_info, get_mapping_stats
 
 # 한국 시간대 설정
 KST = timezone(timedelta(hours=9))
@@ -530,87 +532,9 @@ def read_excel_file_safely(uploaded_file):
     
     return df
 
-
-# 🎯 출고 현황 처리 함수들
-def extract_product_from_option(option_text):
-    """옵션에서 상품 분류 추출 (H열 우선)"""
-    if pd.isna(option_text):
-        return "기타"
-    
-    option_text = str(option_text).lower()
-    
-    if "단호박식혜" in option_text:
-        return "단호박식혜"
-    elif "일반식혜" in option_text or ("식혜" in option_text and "단호박" not in option_text):
-        return "식혜"
-    elif "수정과" in option_text:
-        return "수정과"
-    elif "쌀요거트" in option_text or "요거트" in option_text or "플레인" in option_text:
-        return "플레인 쌀요거트"
-    
-    return "기타"
-
-def extract_product_from_name(product_name):
-    """상품이름에서 분류 추출 (G열 - 보조용)"""
-    if pd.isna(product_name):
-        return "기타"
-    
-    product_name = str(product_name).lower()
-    
-    bracket_match = re.search(r'\[서로\s+([^\]]+)\]', product_name)
-    if bracket_match:
-        product_key = bracket_match.group(1).strip()
-        
-        if "단호박식혜" in product_key:
-            return "단호박식혜"
-        elif "진하고 깊은 식혜" in product_key or "식혜" in product_key:
-            return "식혜"
-        elif "수정과" in product_key:
-            return "수정과"
-        elif "쌀요거트" in product_key:
-            return "플레인 쌀요거트"
-    
-    if "쌀요거트" in product_name or "요거트" in product_name or "플레인" in product_name:
-        return "플레인 쌀요거트"
-    
-    return "기타"
-
-def parse_option_info(option_text):
-    """옵션에서 수량과 용량 추출"""
-    if pd.isna(option_text):
-        return 1, ""
-    
-    option_text = str(option_text)
-    
-    # 패턴 1: "5개, 240ml" 또는 "10개, 500ml"
-    pattern1 = re.search(r'(\d+)개,\s*(\d+(?:\.\d+)?(?:ml|L))', option_text)
-    if pattern1:
-        return int(pattern1.group(1)), pattern1.group(2)
-    
-    # 패턴 2: "2, 1L" 또는 "4, 1L"
-    pattern2 = re.search(r'(\d+),\s*(\d+(?:\.\d+)?(?:ml|L))', option_text)
-    if pattern2:
-        return int(pattern2.group(1)), pattern2.group(2)
-    
-    # 패턴 3: "용량 : 1L 2병"
-    pattern3 = re.search(r'용량\s*:\s*(\d+(?:\.\d+)?(?:ml|L))\s*(\d+)병', option_text)
-    if pattern3:
-        return int(pattern3.group(2)), pattern3.group(1)
-    
-    # 패턴 4: "500ml 3병" 또는 "500ml 5병"
-    pattern4 = re.search(r'(\d+(?:\.\d+)?(?:ml|L))\s*(\d+)병', option_text)
-    if pattern4:
-        return int(pattern4.group(2)), pattern4.group(1)
-    
-    # 패턴 5: 단순 용량만 "플레인 쌀요거트 1L"
-    capacity_match = re.search(r'(\d+(?:\.\d+)?(?:ml|L))', option_text)
-    if capacity_match:
-        return 1, capacity_match.group(1)
-    
-    return 1, ""
-
-def standardize_capacity(capacity):
-    """용량 표준화 - 출고 현황용 (200ml 그대로 표시)"""
+# ✅ 새로운 용량 표준화 함수들 (용도별 분리)
+def standardize_capacity_for_display(capacity):
+    """용량 표준화 - 출고 현황/재고 관리용 (200ml 그대로 표시)"""
     if not capacity:
         return ""
     
@@ -625,7 +549,7 @@ def standardize_capacity(capacity):
     if re.match(r'240ml', capacity, re.IGNORECASE):
         return "240ml"
     if re.match(r'200ml', capacity, re.IGNORECASE):
-        return "200ml"
+        return "200ml"  # 200ml 그대로 유지
     
     return capacity
 
@@ -649,13 +573,13 @@ def standardize_capacity_for_box(capacity):
     
     return capacity
 
-# 📦 박스 계산 함수들
-def group_orders_by_recipient(df):
-    """수취인별로 주문을 그룹화하여 박스 계산 - 동명이인 구분 개"""
+# 📦 박스 계산 함수들 (완전히 새로운 방식)
+def group_orders_by_recipient_new(df):
+    """수취인별로 주문을 그룹화하여 박스 계산 - 새로운 매핑 방식"""
     orders = defaultdict(dict)
     
     for _, row in df.iterrows():
-        # 복합 키 생성: 수취인이름 + 주문자이름으로 동명이인 구
+        # 복합 키 생성: 수취인이름 + 주문자이름으로 동명이인 구분
         recipient_name = row.get('수취인이름', '알 수 없음')
         orderer_name = row.get('주문자이름', '').strip()
 
@@ -665,26 +589,26 @@ def group_orders_by_recipient(df):
         else:
             recipient_key = f"{recipient_name} - 직접주문"
         
-        # 상품 정보 추출
-        option_product = extract_product_from_option(row.get('옵션이름', ''))
-        name_product = extract_product_from_name(row.get('상품이름', ''))
-        final_product = option_product if option_product != "기타" else name_product
-        
-        # 수량 및 용량 정보
-        option_quantity, capacity = parse_option_info(row.get('옵션이름', ''))
+        # ✅ 새로운 매핑 방식 사용
+        product_type, capacity, option_count = get_product_info(
+            row.get('상품이름', ''), 
+            row.get('옵션이름', '')
+        )
         
         try:
             base_quantity = int(row.get('상품수량', 1))
         except (ValueError, TypeError):
             base_quantity = 1
         
-        total_quantity = base_quantity * option_quantity
+        total_quantity = base_quantity * option_count
+        
+        # 박스 계산용 용량 표준화 (200ml → 240ml)
         standardized_capacity = standardize_capacity_for_box(capacity)
         
         if standardized_capacity:
-            key = f"{final_product} {standardized_capacity}"
+            key = f"{product_type} {standardized_capacity}"
         else:
-            key = final_product
+            key = product_type
         
         orders[recipient_key][key] = orders[recipient_key].get(key, 0) + total_quantity
     
@@ -754,9 +678,9 @@ def calculate_box_for_order(quantities):
     # 3단계: 어떤 박스 조건도 만족하지 않으면 검토 필요
     return "검토 필요"
 
-def calculate_box_requirements(df):
-    """전체 박스 필요량 계산 - 새로운 로직"""
-    orders = group_orders_by_recipient(df)
+def calculate_box_requirements_new(df):
+    """전체 박스 필요량 계산 - 새로운 매핑 로직"""
+    orders = group_orders_by_recipient_new(df)
     
     total_boxes = defaultdict(int)
     review_orders = []  # 검토 필요 주문들
@@ -776,22 +700,23 @@ def calculate_box_requirements(df):
     
     return total_boxes, review_orders
 
-def process_unified_file(uploaded_file):
-    """통합 엑셀 파일 처리 - 출고 현황용 (개선된 메모리 관리)"""
+def process_unified_file_new(uploaded_file):
+    """통합 엑셀 파일 처리 - 새로운 매핑 방식 (개선된 메모리 관리)"""
     try:
         df = read_excel_file_safely(uploaded_file)
         
         if df is None:
-            return {}, []
+            return {}, [], {}
         
         df = sanitize_data(df)
         
         if df.empty:
-            return {}, []
+            return {}, [], {}
         
         st.write(f"📄 **{uploaded_file.name}**: 통합 파일 처리 시작 (총 {len(df):,}개 주문)")
         
         results = defaultdict(int)
+        mapping_failures = []  # 매핑 실패 케이스 추적
         
         # 프로그레스 바 추가
         progress_bar = st.progress(0)
@@ -805,25 +730,35 @@ def process_unified_file(uploaded_file):
             progress_bar.progress(progress)
             status_text.text(f"처리 중... {index + 1:,}/{total_rows:,} ({progress:.1%})")
             
-            option_product = extract_product_from_option(row.get('옵션이름', ''))
-            name_product = extract_product_from_name(row.get('상품이름', ''))
-            final_product = option_product if option_product != "기타" else name_product
+            # ✅ 새로운 매핑 방식 사용
+            product_type, capacity, option_count = get_product_info(
+                row.get('상품이름', ''), 
+                row.get('옵션이름', '')
+            )
             
-            option_quantity, capacity = parse_option_info(row.get('옵션이름', ''))
+            # 매핑 실패 케이스 기록
+            if product_type == "기타":
+                mapping_failures.append({
+                    'row': index + 1,
+                    'product_name': row.get('상품이름', ''),
+                    'option_name': row.get('옵션이름', ''),
+                    'quantity': row.get('상품수량', 1)
+                })
             
             try:
                 base_quantity = int(row.get('상품수량', 1))
             except (ValueError, TypeError):
                 base_quantity = 1
                 
-            total_quantity = base_quantity * option_quantity
+            total_quantity = base_quantity * option_count
             
-            standardized_capacity = standardize_capacity(capacity)
+            # 출고 현황용 용량 표준화 (200ml 그대로)
+            standardized_capacity = standardize_capacity_for_display(capacity)
             
             if standardized_capacity:
-                key = f"{final_product} {standardized_capacity}"
+                key = f"{product_type} {standardized_capacity}"
             else:
-                key = final_product
+                key = product_type
             
             results[key] += total_quantity
         
@@ -833,15 +768,24 @@ def process_unified_file(uploaded_file):
         
         processed_files = [f"통합 파일 ({len(df):,}개 주문)"]
         
+        # 매핑 실패 통계
+        mapping_stats = {
+            'total_processed': len(df),
+            'successful_mappings': len(df) - len(mapping_failures),
+            'failed_mappings': len(mapping_failures),
+            'success_rate': ((len(df) - len(mapping_failures)) / len(df) * 100) if len(df) > 0 else 0,
+            'failure_details': mapping_failures
+        }
+        
         # 메모리 정리 추가
         del df
         gc.collect()
         
-        return results, processed_files
+        return results, processed_files, mapping_stats
         
     except Exception as e:
         st.error(f"❌ {uploaded_file.name} 처리 중 오류: {str(e)}")
-        return {}, []
+        return {}, [], {}
 
 def get_product_color(product_name):
     """상품명에 따른 색상 반환"""
@@ -869,6 +813,14 @@ def get_korean_date():
 korean_date = get_korean_date()
 st.title(f"🎯 서로별 관리 시스템 - {korean_date}")
 st.markdown("### 🔒 보안 강화 버전")
+
+# ✅ 매핑 모듈 정보 표시 (관리자 모드에서만)
+if st.session_state.get('admin_mode', False):
+    try:
+        mapping_stats = get_mapping_stats()
+        st.sidebar.success(f"🎯 매핑 모듈: {mapping_stats['total_cases']}개 케이스 로드됨")
+    except:
+        st.sidebar.warning("⚠️ 매핑 모듈 로드 실패")
 
 # 관리자 권한 확인
 is_admin = check_admin_access()
@@ -1022,7 +974,6 @@ with tab2:
         total_box_count = sum(total_boxes.values())
         box_e_count = len(box_e_orders)
 
-        #col1, col2 있던 곳
         col1, col2 = st.columns(2)
         with col1:
             st.markdown(f"""
@@ -1066,7 +1017,7 @@ with tab2:
         # 일반 박스 계산
         sorted_boxes = sorted(total_boxes.items(), key=lambda x: BOX_COST_ORDER.get(x[0], 999))
 
-        # 여기에 BOX_DESCRIPTIONS 추가
+        # 박스 설명
         BOX_DESCRIPTIONS = {
             "박스 A": "1L 1~2개, 500ml 1~3개, 240ml 1~5개",
             "박스 B": "1L 3~4개, 500ml 4~6개, 240ml 6~10개", 
@@ -1162,7 +1113,7 @@ with tab2:
     else:
         st.info("📦 **박스 계산 데이터를 확인하려면 관리자가 수취인이름이 포함된 통합 엑셀 파일을 업로드해야 합니다.**")
 
-# 세 번째 탭: 재고 관리
+# 세 번째 탭: 재고 관리 (기존 코드와 동일하므로 유지)
 with tab3:
     st.header("📊 재고 관리")
     
@@ -1216,7 +1167,7 @@ with tab3:
             with col1:
                 st.info("💡 **출고 현황 반영**: 현재 재고에서 출고된 수량을 자동으로 차감하여 실제 재고량을 계산합니다.")
             with col2:
-                st.markdown("<br>", unsafe_allow_html=True)  # 이 줄을 추가
+                st.markdown("<br>", unsafe_allow_html=True)
                 if st.button("📦 출고 현황 반영", help="출고된 수량만큼 재고를 자동으로 차감합니다"):
                     # 현재 재고 이력 로드
                     current_stock = stock_results if stock_results else {}
@@ -1417,7 +1368,6 @@ with tab3:
             # 여백 추가 (거리 넓히기)
             st.markdown("<br><br>", unsafe_allow_html=True)
 
-            #col1, col2, col3 자리
             col1, col2, col3 = st.columns(3)
             
             with col1:
@@ -1478,22 +1428,6 @@ with tab3:
             
             stock_input = {}
             
-            # 상품별로 그룹화
-            product_groups = {}
-            for product_key in product_keys:
-                parts = product_key.strip().split()
-                if len(parts) >= 2 and re.match(r'\d+(?:\.\d+)?(?:ml|L)', parts[-1]):
-                    product_name = ' '.join(parts[:-1])
-                    capacity = parts[-1]
-                else:
-                    product_name = product_key
-                    capacity = ""
-                
-                if product_name not in product_groups:
-                    product_groups[product_name] = []
-                product_groups[product_name].append((capacity, product_key))
-                        
-            # 저장 버튼있던 곳
             # 상품별로 그룹화
             product_groups = {}
             for product_key in product_keys:
@@ -1588,7 +1522,7 @@ with tab3:
         st.info("📋 **재고 관리를 위해서는 먼저 출고 현황 데이터가 필요합니다.**")
         st.markdown("관리자가 출고 현황을 업로드하면 자동으로 재고 입력이 가능해집니다.")
 
-# 관리자 파일 업로드 (tab3 밖에서)
+# 관리자 파일 업로드 (새로운 매핑 방식)
 if is_admin:
     st.markdown("---")
     st.markdown("## 👑 관리자 전용 - 통합 파일 업로드")
@@ -1604,6 +1538,8 @@ if is_admin:
     - **박스 계산**: 200ml을 240ml과 동일하게 처리
     - **재고 관리**: 출고 현황과 자동 동기화
     - **.xlsx 형식만 지원**
+    
+    ✅ **새로운 기능**: 94개 케이스 완전 매핑 + 기타 제품 추적
     """)
     
     uploaded_file = st.file_uploader(
@@ -1613,16 +1549,15 @@ if is_admin:
         key="unified_file_uploader"
     )
     
-    #if uploaded_file: 있던 곳
     if uploaded_file:
         # 세션 상태에 파일 저장
         st.session_state.last_uploaded_file = uploaded_file
 
         with st.spinner('🔒 통합 파일 보안 처리 및 영구 저장 중...'):
-            # 출고 현황 처리 및 저장
-            results, processed_files = process_unified_file(uploaded_file)
+            # ✅ 새로운 매핑 방식으로 출고 현황 처리
+            results, processed_files, mapping_stats = process_unified_file_new(uploaded_file)
             
-            # 박스 계산 처리
+            # ✅ 새로운 매핑 방식으로 박스 계산 처리
             uploaded_file.seek(0)
             df_for_box = read_excel_file_safely(uploaded_file)
             box_results = {}
@@ -1630,7 +1565,7 @@ if is_admin:
             if df_for_box is not None:
                 df_for_box = sanitize_data(df_for_box)
                 if not df_for_box.empty and '수취인이름' in df_for_box.columns:
-                    total_boxes, box_e_orders = calculate_box_requirements(df_for_box)
+                    total_boxes, box_e_orders = calculate_box_requirements_new(df_for_box)
                     
                     box_results = {
                         'total_boxes': dict(total_boxes),
@@ -1644,15 +1579,94 @@ if is_admin:
                         ]
                     }
                     
-        # 결과 표시 (기존 코드 수정)
+        # 결과 저장
         shipment_saved = save_shipment_data(results) if results else False
         box_saved = save_box_data(box_results) if box_results else False
+        
+        # ✅ 매핑 성공률 및 기타 제품 표시
+        if mapping_stats:
+            st.markdown("### 📊 제품 매핑 결과")
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric(
+                    "총 처리 주문", 
+                    f"{mapping_stats['total_processed']:,}건"
+                )
+            
+            with col2:
+                st.metric(
+                    "매핑 성공률", 
+                    f"{mapping_stats['success_rate']:.1f}%",
+                    f"{mapping_stats['successful_mappings']:,}건 성공"
+                )
+            
+            with col3:
+                failed_count = mapping_stats['failed_mappings']
+                st.metric(
+                    "기타 제품", 
+                    f"{failed_count}건",
+                    f"매핑 실패" if failed_count > 0 else "완벽!"
+                )
+            
+            # 기타 제품 상세 내역 (있을 경우)
+            if mapping_stats['failed_mappings'] > 0:
+                with st.expander(f"⚠️ 기타로 분류된 제품 내역 ({mapping_stats['failed_mappings']}건)", expanded=False):
+                    st.warning("다음 제품들이 '기타'로 분류되었습니다. 제품 매핑 테이블 업데이트가 필요할 수 있습니다.")
+                    
+                    failure_data = []
+                    for failure in mapping_stats['failure_details']:
+                        failure_data.append({
+                            "행번호": failure['row'],
+                            "상품이름": failure['product_name'],
+                            "옵션이름": failure['option_name'],
+                            "수량": failure['quantity']
+                        })
+                    
+                    if failure_data:
+                        failure_df = pd.DataFrame(failure_data)
+                        st.dataframe(failure_df, use_container_width=True)
+                        
+                        # 기타 제품 요약
+                        total_other_quantity = sum(failure['quantity'] for failure in mapping_stats['failure_details'])
+                        st.info(f"📋 기타 제품 총 수량: {total_other_quantity}개")
         
         # 결과 표시
         if shipment_saved and box_saved:
             st.success("✅ 출고 현황, 박스 계산 결과가 모두 영구 저장되었습니다!")
-        else:
-            st.error("❌ 데이터 저장 중 오류가 발생했습니다.")
+            st.balloons()
+            
+            # 새로고침 버튼 추가
+                        if st.button("🔄 페이지 새로고침"):
+                            st.rerun()
+                    else:
+                        st.error("❌ 데이터 저장 중 오류가 발생했습니다.")
+                        
+                # ✅ 매핑 모듈 상태 표시 (하단)
+                if is_admin:
+                    with st.expander("🔧 매핑 모듈 정보", expanded=False):
+                        try:
+                            mapping_stats = get_mapping_stats()
+                            st.success(f"📊 총 {mapping_stats['total_cases']}개의 매핑 케이스 로드됨")
+                            
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.markdown("**제품별 케이스 수:**")
+                                for product, count in sorted(mapping_stats['product_stats'].items()):
+                                    st.write(f"- {product}: {count}개")
+                            
+                            with col2:
+                                st.markdown("**🏗️ 모듈 정보:**")
+                                st.write("- **매핑 방식**: O(1) 해시테이블")
+                                st.write("- **정확도**: 94개 케이스 완전 매핑")
+                                st.write("- **실패 처리**: 기타 제품 자동 분류")
+                                st.write("- **패턴**: 싱글톤")
+                                
+                        except Exception as e:
+                            st.error(f"❌ 매핑 모듈 로드 실패: {e}")
+                            st.warning("💡 product_mapping.py 파일이 같은 폴더에 있는지 확인하세요.")
+
 
 
 
