@@ -1634,39 +1634,39 @@ if is_admin:
                         st.info(f"📋 기타 제품 총 수량: {total_other_quantity}개")
         
         # 결과 표시
-        if shipment_saved and box_saved:
-            st.success("✅ 출고 현황, 박스 계산 결과가 모두 영구 저장되었습니다!")
-            st.balloons()
-            
-            # 새로고침 버튼 추가
-                        if st.button("🔄 페이지 새로고침"):
-                            st.rerun()
-                    else:
-                        st.error("❌ 데이터 저장 중 오류가 발생했습니다.")
+                if shipment_saved and box_saved:
+                    st.success("✅ 출고 현황, 박스 계산 결과가 모두 영구 저장되었습니다!")
+                    st.balloons()
+                    
+                    # 새로고침 버튼 추가
+                    if st.button("🔄 페이지 새로고침"):
+                        st.rerun()
+                else:
+                    st.error("❌ 데이터 저장 중 오류가 발생했습니다.")
+        
+        # ✅ 매핑 모듈 상태 표시 (하단) - if is_admin 블록 외부
+        if is_admin:
+            with st.expander("🔧 매핑 모듈 정보", expanded=False):
+                try:
+                    mapping_stats = get_mapping_stats()
+                    st.success(f"📊 총 {mapping_stats['total_cases']}개의 매핑 케이스 로드됨")
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown("**제품별 케이스 수:**")
+                        for product, count in sorted(mapping_stats['product_stats'].items()):
+                            st.write(f"- {product}: {count}개")
+                    
+                    with col2:
+                        st.markdown("**🏗️ 모듈 정보:**")
+                        st.write("- **매핑 방식**: O(1) 해시테이블")
+                        st.write("- **정확도**: 94개 케이스 완전 매핑")
+                        st.write("- **실패 처리**: 기타 제품 자동 분류")
+                        st.write("- **패턴**: 싱글톤")
                         
-                # ✅ 매핑 모듈 상태 표시 (하단)
-                if is_admin:
-                    with st.expander("🔧 매핑 모듈 정보", expanded=False):
-                        try:
-                            mapping_stats = get_mapping_stats()
-                            st.success(f"📊 총 {mapping_stats['total_cases']}개의 매핑 케이스 로드됨")
-                            
-                            col1, col2 = st.columns(2)
-                            with col1:
-                                st.markdown("**제품별 케이스 수:**")
-                                for product, count in sorted(mapping_stats['product_stats'].items()):
-                                    st.write(f"- {product}: {count}개")
-                            
-                            with col2:
-                                st.markdown("**🏗️ 모듈 정보:**")
-                                st.write("- **매핑 방식**: O(1) 해시테이블")
-                                st.write("- **정확도**: 94개 케이스 완전 매핑")
-                                st.write("- **실패 처리**: 기타 제품 자동 분류")
-                                st.write("- **패턴**: 싱글톤")
-                                
-                        except Exception as e:
-                            st.error(f"❌ 매핑 모듈 로드 실패: {e}")
-                            st.warning("💡 product_mapping.py 파일이 같은 폴더에 있는지 확인하세요.")
+                except Exception as e:
+                    st.error(f"❌ 매핑 모듈 로드 실패: {e}")
+                    st.warning("💡 product_mapping.py 파일이 같은 폴더에 있는지 확인하세요.")
 
 
 
