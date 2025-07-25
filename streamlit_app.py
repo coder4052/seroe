@@ -1458,8 +1458,9 @@ with tab3:
                                 input_key = f"{product_name}|{capacity}"
                                 existing_value = stock_results["최근입력"]["입력용"].get(input_key, 0)
                             
+                            label_text = f"{capacity}" if capacity else "기본 용량"
                             stock_input[f"{product_name}|{capacity}"] = st.number_input(
-                                f"{capacity}",
+                                label_text,
                                 min_value=0,
                                 value=existing_value,
                                 step=1,
@@ -1475,14 +1476,14 @@ with tab3:
                         input_key = f"{product_name}|{capacity}"
                         existing_value = stock_results["최근입력"]["입력용"].get(input_key, 0)
                     
+                    label_text = f"{capacity}" if capacity else "기본 용량"  
                     stock_input[f"{product_name}|{capacity}"] = st.number_input(
-                        f"{capacity}",
+                        label_text,
                         min_value=0,
                         value=existing_value,
                         step=1,
                         key=f"stock_{product_name}_{capacity}"
-                    )
-            
+                    )            
             # 저장 버튼
             submitted = st.form_submit_button("💾 재고 저장", help="입력한 재고 수량을 저장합니다")
             
