@@ -29,6 +29,26 @@ SHIPMENT_FILE_PATH = "data/출고현황_encrypted.json"
 BOX_FILE_PATH = "data/박스계산_encrypted.json"
 STOCK_FILE_PATH = "data/재고현황_encrypted.json"
 
+# ✅ 새로 추가: 컬럼 매핑 테이블
+def detect_and_standardize_columns(df):
+    """새로운 엑셀 양식의 컬럼명을 표준화"""
+    rename_dict = {
+        '노출상품명(옵션명)': '상품이름',
+        '등록옵션명': '옵션이름',
+        '구매수(수량)': '상품수량',
+        '구매자': '주문자이름',
+        '구매자전화번호': '주문자전화번호1'
+    }
+    
+    detected = [f"{v} ← {k}" for k, v in rename_dict.items() if k in df.columns]
+    if detected:
+        st.success("✅ **새로운 엑셀 양식 감지!**")
+        st.info("📋 **매핑**: " + " | ".join(detected))
+    
+    return df.rename(columns=rename_dict)
+
+
+
 # 페이지 설정
 st.set_page_config(
     page_title="서로 출고 현황",
@@ -256,9 +276,10 @@ STOCK_THRESHOLDS = {
 
 # 🔒 보안 함수들
 def sanitize_data(df):
-    """민감정보 완전 제거 - 박스 계산용"""
-    safe_columns = ['상품이름', '옵션이름', '상품수량', '수취인이름', '주문자이름', '주문자전화번호1']
+    """민감정보 완전 제거 - 새로운 엑셀 양식 전용"""
+    df = detect_and_standardize_columns(df)
     
+    safe_columns = ['상품이름', '옵션이름', '상품수량', '수취인이름', '주문자이름', '주문자전화번호1']
     available_columns = df.columns.intersection(safe_columns)
     sanitized_df = df[available_columns].copy()
     
@@ -266,10 +287,13 @@ def sanitize_data(df):
     missing_columns = [col for col in essential_columns if col not in sanitized_df.columns]
     if missing_columns:
         st.error(f"❌ 필수 컬럼이 없습니다: {missing_columns}")
-        st.info("💡 엑셀 파일의 컬럼명을 확인하세요: G열(상품이름), H열(옵션이름), N열(상품수량)")
+        st.info("💡 새로운 엑셀 양식 컬럼을 확인하세요:")
+        st.info("   - M열: 노출상품명(옵션명)")
+        st.info("   - L열: 등록옵션명") 
+        st.info("   - W열: 구매수(수량)")
         return pd.DataFrame()
     
-    st.success(f"✅ 필수 컬럼 정상 처리: {list(available_columns)}")
+    st.success(f"✅ 새로운 양식 처리 완료: {list(available_columns)}")
     return sanitized_df
 
 def encrypt_results(results):
