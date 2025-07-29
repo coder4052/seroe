@@ -92,7 +92,7 @@ class ProductMapper:
         # 케이스 16: [서로 식혜] 수제 전통 국산 엿기름 (2~5개, 240ml/1L)
         for count in range(2, 6):
             for capacity in ["240ml", "1L"]:
-                key = ("[서로 식혜] 수제 전통 국산 엿기름", f"서로 식혤 : {capacity} {count}병")
+                key = ("[서로 식혜] 수제 전통 국산 엿기름", f"서로 식혜 : {capacity} {count}병")
                 dynamic_mapping[key] = ("식혜", capacity, count)
 
         # ✅ 먼저 capacities_17 정의        
@@ -104,8 +104,8 @@ class ProductMapper:
                 key = ("[서로 식혜] 1L 호박식혜 단호박식혜 수제 전통 국산 엿기름", f"서로 식혜: 단호박식혜 / 용량: {capacity} {count}병")
                 dynamic_mapping[key] = ("단호박식혜", capacity, count)
                 
-                key = ("[서로 식혤] 1L 호박식혜 단호박식혜 수제 전통 국산 엿기름", f"서로 식혜: 일반식혜 / 용량: {capacity} {count}병")
-                dynamic_mapping[key] = ("식혤", capacity, count)
+                key = ("[서로 식혜] 1L 호박식혜 단호박식혜 수제 전통 국산 엿기름", f"서로 식혜: 일반식혜 / 용량: {capacity} {count}병")
+                dynamic_mapping[key] = ("식혜", capacity, count)
 
         # 케이스 17: 단호박식혜 (240ml는 2개 고정, 1L/1.5L은 1개)
         for capacity, count in capacities_17:
